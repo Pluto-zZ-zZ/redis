@@ -3550,6 +3550,7 @@ void rejectCommandFormat(client *c, const char *fmt, ...) {
  * other operations can be performed by the caller. Otherwise
  * if C_ERR is returned the client was destroyed (i.e. after QUIT). */
 int processCommand(client *c) {
+    serverLog(LL_NOTICE,"accept cmd : %s", c->argv[0]->ptr);
     moduleCallCommandFilters(c);
 
     /* The QUIT command is handled separately. Normal command procs will
