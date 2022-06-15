@@ -3541,6 +3541,14 @@ void rejectCommandFormat(client *c, const char *fmt, ...) {
     sdsfree(s);
 }
 
+void printCommand(client *c){
+    sds args = sdsempty();
+    int i;
+    for (i=0; i < c->argc && sdslen(args) < 128; i++)
+        args = sdscatprintf(args, "%.*s ", 128-(int)sdslen(args), (char*)c->argv[i]->ptr);
+    serverLog(LL_NOTICE,"accept cmd : %s", args);
+}
+
 /* If this function gets called we already read a whole
  * command, arguments are in the client argv/argc fields.
  * processCommand() execute the command or prepare the
@@ -3550,7 +3558,9 @@ void rejectCommandFormat(client *c, const char *fmt, ...) {
  * other operations can be performed by the caller. Otherwise
  * if C_ERR is returned the client was destroyed (i.e. after QUIT). */
 int processCommand(client *c) {
-    serverLog(LL_NOTICE,"accept cmd : %s", c->argv[0]->ptr);
+    // 打印命令
+    printCommand(c);
+
     moduleCallCommandFilters(c);
 
     /* The QUIT command is handled separately. Normal command procs will
@@ -5470,7 +5480,7 @@ int main(int argc, char **argv) {
 
     if (!server.sentinel_mode) {
         /* Things not needed when running in Sentinel mode. */
-        serverLog(LL_WARNING,"Server initialized");
+        serverLog(LL_WARNING,"Pluto-Server initialized");
     #ifdef __linux__
         linuxMemoryWarnings();
     #if defined (__arm64__)
